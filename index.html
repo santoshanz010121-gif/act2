@@ -2,50 +2,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Student Management System</title>
+    <title>Student CRUD</title>
 </head>
-
 <body>
 
     <h2>Student Management System</h2>
 
-    <label>Student ID:</label>
-    <input type="text" id="studentId">
-    <br><br>
-
-    <label>Student Name:</label>
-    <input type="text" id="studentName">
-    <br><br>
-
-    <label>Course:</label>
-    <input type="text" id="studentCourse">
-    <br><br>
+    <input type="text" id="studentId" placeholder="Student ID">
+    <input type="text" id="studentName" placeholder="Student Name">
+    <input type="text" id="studentCourse" placeholder="Course">
 
     <input type="hidden" id="editIndex" value="-1">
 
-    <button onclick="saveStudent()">Save Student</button>
+    <button onclick="saveStudent()">Save</button>
     <button onclick="clearForm()">Clear</button>
 
     <br><br>
 
-    <label>Search:</label>
-    <input type="text" id="searchInput">
-
+    <input type="text" id="searchInput" placeholder="Search student">
     <button onclick="searchStudent()">Search</button>
     <button onclick="displayStudents()">Show All</button>
-    <button onclick="sortStudentsByName()">Sort by Name</button>
+    <button onclick="sortStudents()">Sort by Name</button>
 
     <br><br>
 
-    <table border="1" cellpadding="8">
-        <thead>
-            <tr>
-                <th>Student ID</th>
-                <th>Name</th>
-                <th>Course</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
+    <table border="1">
+        <tr>
+            <th>Student ID</th>
+            <th>Name</th>
+            <th>Course</th>
+            <th>Action</th>
+        </tr>
 
         <tbody id="studentTable"></tbody>
     </table>
@@ -58,9 +45,9 @@
 
         function saveStudent() {
 
-            let id = document.getElementById("studentId").value.trim();
-            let name = document.getElementById("studentName").value.trim();
-            let course = document.getElementById("studentCourse").value.trim();
+            let id = document.getElementById("studentId").value;
+            let name = document.getElementById("studentName").value;
+            let course = document.getElementById("studentCourse").value;
             let editIndex = parseInt(document.getElementById("editIndex").value);
 
             if (id == "" || name == "" || course == "") {
@@ -68,16 +55,16 @@
                 return;
             }
 
-            for (let index = 0; index < students.length; index++) {
+            for (let i = 0; i < students.length; i++) {
 
-                if (index != editIndex) {
+                if (i != editIndex) {
 
-                    if (students[index].id.toLowerCase() == id.toLowerCase()) {
+                    if (students[i].id == id) {
                         alert("Student ID already exists.");
                         return;
                     }
 
-                    if (students[index].name.toLowerCase() == name.toLowerCase()) {
+                    if (students[i].name.toLowerCase() == name.toLowerCase()) {
                         alert("Student name already exists.");
                         return;
                     }
@@ -116,30 +103,25 @@
 
             table.innerHTML = "";
 
+            for (let i = 0; i < students.length; i++) {
+
+                table.innerHTML +=
+                    "<tr>" +
+                    "<td>" + students[i].id + "</td>" +
+                    "<td>" + students[i].name + "</td>" +
+                    "<td>" + students[i].course + "</td>" +
+                    "<td>" +
+                    "<button onclick='editStudent(" + i + ")'>Edit</button> " +
+                    "<button onclick='deleteStudent(" + i + ")'>Delete</button>" +
+                    "</td>" +
+                    "</tr>";
+            }
+
             if (students.length == 0) {
 
                 table.innerHTML =
                     "<tr>" +
                     "<td colspan='4'>No student records found.</td>" +
-                    "</tr>";
-
-                document.getElementById("studentTotal").innerHTML =
-                    "Total Students: 0";
-
-                return;
-            }
-
-            for (let index = 0; index < students.length; index++) {
-
-                table.innerHTML +=
-                    "<tr>" +
-                    "<td>" + students[index].id + "</td>" +
-                    "<td>" + students[index].name + "</td>" +
-                    "<td>" + students[index].course + "</td>" +
-                    "<td>" +
-                    "<button onclick='editStudent(" + index + ")'>Edit</button> " +
-                    "<button onclick='deleteStudent(" + index + ")'>Delete</button>" +
-                    "</td>" +
                     "</tr>";
             }
 
@@ -173,12 +155,8 @@
                 return;
             }
 
-            for (
-                let position = index;
-                position < students.length - 1;
-                position++
-            ) {
-                students[position] = students[position + 1];
+            for (let i = index; i < students.length - 1; i++) {
+                students[i] = students[i + 1];
             }
 
             students.length = students.length - 1;
@@ -195,41 +173,37 @@
             document.getElementById("studentId").value = "";
             document.getElementById("studentName").value = "";
             document.getElementById("studentCourse").value = "";
-            document.getElementById("editIndex").value = "-1";
+            document.getElementById("editIndex").value = -1;
         }
 
 
         function searchStudent() {
 
-            let searchValue =
-                document.getElementById("searchInput").value
-                .trim()
-                .toLowerCase();
-
+            let search = document.getElementById("searchInput").value;
             let table = document.getElementById("studentTable");
+
+            search = search.toLowerCase();
 
             table.innerHTML = "";
 
             let found = false;
 
-            for (let index = 0; index < students.length; index++) {
+            for (let i = 0; i < students.length; i++) {
 
-                let studentId = students[index].id.toLowerCase();
-                let studentName = students[index].name.toLowerCase();
+                let id = students[i].id.toLowerCase();
+                let name = students[i].name.toLowerCase();
 
-                if (
-                    studentId.indexOf(searchValue) != -1 ||
-                    studentName.indexOf(searchValue) != -1
-                ) {
+                if (id.indexOf(search) != -1 ||
+                    name.indexOf(search) != -1) {
 
                     table.innerHTML +=
                         "<tr>" +
-                        "<td>" + students[index].id + "</td>" +
-                        "<td>" + students[index].name + "</td>" +
-                        "<td>" + students[index].course + "</td>" +
+                        "<td>" + students[i].id + "</td>" +
+                        "<td>" + students[i].name + "</td>" +
+                        "<td>" + students[i].course + "</td>" +
                         "<td>" +
-                        "<button onclick='editStudent(" + index + ")'>Edit</button> " +
-                        "<button onclick='deleteStudent(" + index + ")'>Delete</button>" +
+                        "<button onclick='editStudent(" + i + ")'>Edit</button> " +
+                        "<button onclick='deleteStudent(" + i + ")'>Delete</button>" +
                         "</td>" +
                         "</tr>";
 
@@ -241,32 +215,28 @@
 
                 table.innerHTML =
                     "<tr>" +
-                    "<td colspan='4'>No matching student found.</td>" +
+                    "<td colspan='4'>No student found.</td>" +
                     "</tr>";
             }
         }
 
 
-        function sortStudentsByName() {
+        function sortStudents() {
 
-            for (let first = 0; first < students.length - 1; first++) {
+            for (let i = 0; i < students.length - 1; i++) {
 
-                for (
-                    let second = first + 1;
-                    second < students.length;
-                    second++
-                ) {
+                for (let j = i + 1; j < students.length; j++) {
 
                     if (
-                        students[first].name.toLowerCase() >
-                        students[second].name.toLowerCase()
+                        students[i].name.toLowerCase() >
+                        students[j].name.toLowerCase()
                     ) {
 
-                        let temporary = students[first];
+                        let temp = students[i];
 
-                        students[first] = students[second];
+                        students[i] = students[j];
 
-                        students[second] = temporary;
+                        students[j] = temp;
                     }
                 }
             }
