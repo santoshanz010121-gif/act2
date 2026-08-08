@@ -1,209 +1,257 @@
+```html
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>Student Management System 1</title>
+    <title>Student Management System</title>
 </head>
 <body>
 
-    <h2>Student Information Form</h2>
-    <input type="hidden" id="editIndex" value="-1">
-    
+    <h1>Student Management System</h1>
+
     <input type="text" id="studentId" placeholder="Student ID">
     <input type="text" id="studentName" placeholder="Student Name">
     <input type="text" id="studentCourse" placeholder="Course">
-    
+
+    <input type="hidden" id="editIndex" value="-1">
+
+    <br><br>
+
     <button onclick="saveStudent()">Save Student</button>
     <button onclick="clearForm()">Clear</button>
 
-    <hr>
+    <br><br>
 
-    <h3>Student Records</h3>
-    <input type="text" id="searchInput" placeholder="Search by ID or Name" onkeyup="searchStudent()">
-    <button onclick="sortByName()">Sort by Name</button>
+    <input type="text" id="searchStudent" placeholder="Search by ID or Name">
+    <button onclick="searchStudent()">Search</button>
+    <button onclick="displayStudents()">Show All</button>
+    <button onclick="sortStudentsByName()">Sort by Name</button>
 
-    <table border="1" cellpadding="5" style="margin-top: 10px;">
+    <br><br>
+
+    <table border="1">
         <thead>
             <tr>
-                <th>#</th>
                 <th>Student ID</th>
-                <th>Student Name</th>
+                <th>Name</th>
                 <th>Course</th>
                 <th>Actions</th>
             </tr>
         </thead>
-        <tbody id="studentTable"></tbody>
+
+        <tbody id="studentTable">
+        </tbody>
     </table>
 
-    <p id="totalStudents"></p>
+    <p id="studentTotal">Total Students: 0</p>
 
-<script>
-    let students = [];
+    <script>
 
-    function saveStudent() {
-        let id = document.getElementById("studentId").value.trim();
-        let name = document.getElementById("studentName").value.trim();
-        let course = document.getElementById("studentCourse").value.trim();
-        let editIndex = parseInt(document.getElementById("editIndex").value);
+        let students = [];
 
-        if (id === "" || name === "" || course === "") {
-            alert("Please complete all fields.");
-            return;
-        }
+        function saveStudent() {
+            let id = document.getElementById("studentId").value.trim();
+            let name = document.getElementById("studentName").value.trim();
+            let course = document.getElementById("studentCourse").value.trim();
+            let editIndex = parseInt(document.getElementById("editIndex").value);
 
-        for (let i = 0; i < students.length; i++) {
-            if (i !== editIndex) {
-                if (students[i].id.toLowerCase() === id.toLowerCase()) {
-                    alert("Error: Student ID already exists.");
+            if (id == "" || name == "" || course == "") {
+                alert("Please complete all fields.");
+                return;
+            }
+
+            for (let index = 0; index < students.length; index++) {
+                if (students[index].id.toLowerCase() == id.toLowerCase() && index != editIndex) {
+                    alert("Student ID already exists.");
                     return;
                 }
-                if (students[i].name.toLowerCase() === name.toLowerCase()) {
-                    alert("Error: Student Name already exists.");
+
+                if (students[index].name.toLowerCase() == name.toLowerCase() && index != editIndex) {
+                    alert("Student name already exists.");
                     return;
                 }
             }
+
+            if (editIndex == -1) {
+                let newStudent = {
+                    id: id,
+                    name: name,
+                    course: course
+                };
+
+                students[students.length] = newStudent;
+
+                alert("Student added successfully.");
+            } else {
+                students[editIndex].id = id;
+                students[editIndex].name = name;
+                students[editIndex].course = course;
+
+                alert("Student updated successfully.");
+            }
+
+            clearForm();
+            displayStudents();
         }
 
-        if (editIndex === -1) {
-            let newStudent = {
-                id: id,
-                name: name,
-                course: course
-            };
-            students[students.length] = newStudent;
-            alert("Student added successfully.");
-        } else {
-            students[editIndex].id = id;
-            students[editIndex].name = name;
-            students[editIndex].course = course;
-            alert("Student updated successfully.");
-        }
+        function displayStudents() {
+            let table = document.getElementById("studentTable");
 
-        clearForm();
-        displayStudents();
-    }
+            table.innerHTML = "";
 
-    function displayStudents() {
-        let table = document.getElementById("studentTable");
-        table.innerHTML = "";
+            if (students.length == 0) {
+                table.innerHTML =
+                    "<tr>" +
+                    "<td colspan='4'>No student records found.</td>" +
+                    "</tr>";
 
-        if (students.length === 0) {
-            table.innerHTML = "<tr><td colspan='5'>No student records found.</td></tr>";
-            document.getElementById("totalStudents").innerText = "Total Students: 0";
-            return;
-        }
+                document.getElementById("studentTotal").innerHTML =
+                    "Total Students: 0";
 
-        for (let index = 0; index < students.length; index++) {
-            table.innerHTML +=
-                "<tr>" +
-                "<td>" + (index + 1) + "</td>" +
-                "<td>" + students[index].id + "</td>" +
-                "<td>" + students[index].name + "</td>" +
-                "<td>" + students[index].course + "</td>" +
-                "<td>" +
-                    "<button onclick='editStudent(" + index + ")'>Edit</button> " +
-                    "<button onclick='deleteStudent(" + index + ")'>Delete</button>" +
-                "</td>" +
-                "</tr>";
-        }
+                return;
+            }
 
-        document.getElementById("totalStudents").innerText = "Total Students: " + students.length;
-    }
-
-    function editStudent(index) {
-        document.getElementById("studentId").value = students[index].id;
-        document.getElementById("studentName").value = students[index].name;
-        document.getElementById("studentCourse").value = students[index].course;
-        document.getElementById("editIndex").value = index;
-    }
-
-    function deleteStudent(index) {
-        let answer = confirm("Are you sure you want to delete this student?");
-        if (!answer) {
-            return;
-        }
-
-        for (let position = index; position < students.length - 1; position++) {
-            students[position] = students[position + 1];
-        }
-        students.length = students.length - 1;
-
-        clearForm();
-        displayStudents();
-        alert("Student deleted successfully.");
-    }
-
-    function searchStudent() {
-        let query = document.getElementById("searchInput").value.toLowerCase();
-        let table = document.getElementById("studentTable");
-        table.innerHTML = "";
-        let matchCount = 0;
-
-        for (let i = 0; i < students.length; i++) {
-            let id = students[i].id.toLowerCase();
-            let name = students[i].name.toLowerCase();
-
-            if (isSubstring(query, id) || isSubstring(query, name)) {
+            for (let index = 0; index < students.length; index++) {
                 table.innerHTML +=
                     "<tr>" +
-                    "<td>" + (i + 1) + "</td>" +
-                    "<td>" + students[i].id + "</td>" +
-                    "<td>" + students[i].name + "</td>" +
-                    "<td>" + students[i].course + "</td>" +
+                    "<td>" + students[index].id + "</td>" +
+                    "<td>" + students[index].name + "</td>" +
+                    "<td>" + students[index].course + "</td>" +
                     "<td>" +
-                        "<button onclick='editStudent(" + i + ")'>Edit</button> " +
-                        "<button onclick='deleteStudent(" + i + ")'>Delete</button>" +
+                    "<button onclick='editStudent(" + index + ")'>Edit</button> " +
+                    "<button onclick='deleteStudent(" + index + ")'>Delete</button>" +
                     "</td>" +
                     "</tr>";
-                matchCount++;
             }
+
+            document.getElementById("studentTotal").innerHTML =
+                "Total Students: " + students.length;
         }
 
-        if (matchCount === 0) {
-            table.innerHTML = "<tr><td colspan='5'>No matching records found.</td></tr>";
+        function editStudent(index) {
+            document.getElementById("studentId").value =
+                students[index].id;
+
+            document.getElementById("studentName").value =
+                students[index].name;
+
+            document.getElementById("studentCourse").value =
+                students[index].course;
+
+            document.getElementById("editIndex").value = index;
         }
 
-        document.getElementById("totalStudents").innerText = "Total Students: " + students.length + " (Matches: " + matchCount + ")";
-    }
+        function deleteStudent(index) {
+            let answer = confirm(
+                "Are you sure you want to delete this student?"
+            );
 
-    function isSubstring(searchStr, fullStr) {
-        if (searchStr === "") return true;
-        if (searchStr.length > fullStr.length) return false;
+            if (answer == false) {
+                return;
+            }
 
-        for (let i = 0; i <= fullStr.length - searchStr.length; i++) {
-            let found = true;
-            for (let j = 0; j < searchStr.length; j++) {
-                if (fullStr[i + j] !== searchStr[j]) {
-                    found = false;
-                    break;
+            for (
+                let position = index;
+                position < students.length - 1;
+                position++
+            ) {
+                students[position] = students[position + 1];
+            }
+
+            students.length = students.length - 1;
+
+            clearForm();
+            displayStudents();
+
+            alert("Student deleted successfully.");
+        }
+
+        function clearForm() {
+            document.getElementById("studentId").value = "";
+            document.getElementById("studentName").value = "";
+            document.getElementById("studentCourse").value = "";
+            document.getElementById("editIndex").value = "-1";
+        }
+
+        function searchStudent() {
+            let searchValue =
+                document.getElementById("searchStudent").value
+                .trim()
+                .toLowerCase();
+
+            let table = document.getElementById("studentTable");
+
+            let found = false;
+
+            table.innerHTML = "";
+
+            for (let index = 0; index < students.length; index++) {
+
+                let id = students[index].id.toLowerCase();
+                let name = students[index].name.toLowerCase();
+
+                if (
+                    id.indexOf(searchValue) != -1 ||
+                    name.indexOf(searchValue) != -1
+                ) {
+
+                    table.innerHTML +=
+                        "<tr>" +
+                        "<td>" + students[index].id + "</td>" +
+                        "<td>" + students[index].name + "</td>" +
+                        "<td>" + students[index].course + "</td>" +
+                        "<td>" +
+                        "<button onclick='editStudent(" + index + ")'>Edit</button> " +
+                        "<button onclick='deleteStudent(" + index + ")'>Delete</button>" +
+                        "</td>" +
+                        "</tr>";
+
+                    found = true;
                 }
             }
-            if (found) return true;
-        }
-        return false;
-    }
 
-    function sortByName() {
-        for (let i = 0; i < students.length - 1; i++) {
-            for (let j = 0; j < students.length - 1 - i; j++) {
-                if (students[j].name.toLowerCase() > students[j + 1].name.toLowerCase()) {
-                    let temp = students[j];
-                    students[j] = students[j + 1];
-                    students[j + 1] = temp;
-                }
+            if (found == false) {
+                table.innerHTML =
+                    "<tr>" +
+                    "<td colspan='4'>No matching student found.</td>" +
+                    "</tr>";
             }
         }
+
+        function sortStudentsByName() {
+
+            for (
+                let first = 0;
+                first < students.length - 1;
+                first++
+            ) {
+
+                for (
+                    let second = first + 1;
+                    second < students.length;
+                    second++
+                ) {
+
+                    if (
+                        students[first].name.toLowerCase() >
+                        students[second].name.toLowerCase()
+                    ) {
+
+                        let temporary = students[first];
+
+                        students[first] = students[second];
+
+                        students[second] = temporary;
+                    }
+                }
+            }
+
+            displayStudents();
+        }
+
         displayStudents();
-    }
 
-    function clearForm() {
-        document.getElementById("studentId").value = "";
-        document.getElementById("studentName").value = "";
-        document.getElementById("studentCourse").value = "";
-        document.getElementById("editIndex").value = "-1";
-    }
+    </script>
 
-    displayStudents();
-</script>
 </body>
 </html>
+```
