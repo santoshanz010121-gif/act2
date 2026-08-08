@@ -55,7 +55,17 @@
                 return;
             }
 
-            if (isNaN(id)) {
+            let numbersOnly = true;
+
+            for (let i = 0; i < id.length; i++) {
+
+                if (id[i] < "0" || id[i] > "9") {
+                    numbersOnly = false;
+                    break;
+                }
+            }
+
+            if (numbersOnly == false) {
                 alert("Student ID must contain numbers only.");
                 return;
             }
@@ -108,26 +118,28 @@
 
             table.innerHTML = "";
 
-            for (let i = 0; i < students.length; i++) {
-
-                table.innerHTML +=
-                    "<tr>" +
-                    "<td>" + students[i].id + "</td>" +
-                    "<td>" + students[i].name + "</td>" +
-                    "<td>" + students[i].course + "</td>" +
-                    "<td>" +
-                    "<button onclick='editStudent(" + i + ")'>Edit</button> " +
-                    "<button onclick='deleteStudent(" + i + ")'>Delete</button>" +
-                    "</td>" +
-                    "</tr>";
-            }
-
             if (students.length == 0) {
 
                 table.innerHTML =
                     "<tr>" +
                     "<td colspan='4'>No student records found.</td>" +
                     "</tr>";
+
+            } else {
+
+                for (let i = 0; i < students.length; i++) {
+
+                    table.innerHTML +=
+                        "<tr>" +
+                        "<td>" + students[i].id + "</td>" +
+                        "<td>" + students[i].name + "</td>" +
+                        "<td>" + students[i].course + "</td>" +
+                        "<td>" +
+                        "<button onclick='editStudent(" + i + ")'>Edit</button> " +
+                        "<button onclick='deleteStudent(" + i + ")'>Delete</button>" +
+                        "</td>" +
+                        "</tr>";
+                }
             }
 
             document.getElementById("studentTotal").innerHTML =
