@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Management System 1</title>
+</head>
+<body>
+
+    <h2>Student Information Form</h2>
+    <input type="hidden" id="editIndex" value="-1">
+    
+    <input type="text" id="studentId" placeholder="Student ID">
+    <input type="text" id="studentName" placeholder="Student Name">
+    <input type="text" id="studentCourse" placeholder="Course">
+    
+    <button onclick="saveStudent()">Save Student</button>
+    <button onclick="clearForm()">Clear</button>
+
+    <hr>
+
+    <h3>Student Records</h3>
+    <input type="text" id="searchInput" placeholder="Search by ID or Name" onkeyup="searchStudent()">
+    <button onclick="sortByName()">Sort by Name</button>
+
+    <table border="1" cellpadding="5" style="margin-top: 10px;">
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Student ID</th>
+                <th>Student Name</th>
+                <th>Course</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="studentTable"></tbody>
+    </table>
+
+    <p id="totalStudents"></p>
+
+<script>
+    let students = [];
+
+    function saveStudent() {
+        let id = document.getElementById("studentId").value.trim();
+        let name = document.getElementById("studentName").value.trim();
+        let course = document.getElementById("studentCourse").value.trim();
+        let editIndex = parseInt(document.getElementById("editIndex").value);
+
+        if (id === "" || name === "" || course === "") {
+            alert("Please complete all fields.");
+            return;
+        }
+
+        for (let i = 0; i < students.length; i++) {
+            if (i !== editIndex) {
+                if (students[i].id.toLowerCase() === id.toLowerCase()) {
+                    alert("Error: Student ID already exists.");
+                    return;
+                }
+                if (students[i].name.toLowerCase() === name.toLowerCase()) {
+                    alert("Error: Student Name already exists.");
+                    return;
+                }
+            }
+        }
+
+        if (editIndex === -1) {
+            let newStudent = {
+                id: id,
+                name: name,
+                course: course
+            };
+            students[students.length] = newStudent;
+            alert("Student added successfully.");
+        } else {
+            students[editIndex].id = id;
+            students[editIndex].name = name;
+            students[editIndex].course = course;
+            alert("Student updated successfully.");
+        }
+
+        clearForm();
+        displayStudents();
+    }
+
+    function displayStudents() {
+        let table = document.getElementById("studentTable");
+        table.innerHTML = "";
+
+        if (students.length === 0) {
+            table.innerHTML = "<tr><td colspan='5'>No student records found.</td></tr>";
+            document.getElementById("totalStudents").innerText = "Total Students: 0";
+            return;
+        }
+
+        for (let index = 0; index < students.length; index++) {
+            table.innerHTML +=
+                "<tr>" +
+                "<td>" + (index + 1) + "</td>" +
+                "<td>" + students[index].id + "</td>" +
+                "<td>" + students[index].name + "</td>" +
+                "<td>" + students[index].course + "</td>" +
+                "<td>" +
+                    "<button onclick='editStudent(" + index + ")'>Edit</button> " +
+                    "<button onclick='deleteStudent(" + index + ")'>Delete</button>" +
+                "</td>" +
+                "</tr>";
+        }
+
+        document.getElementById("totalStudents").innerText = "Total Students: " + students.length;
+    }
+
+    function editStudent(index) {
+        document.getElementById("studentId").value = students[index].id;
+        document.getElementById("studentName").value = students[index].name;
+        document.getElementById("studentCourse").value = students[index].course;
+        document.getElementById("editIndex").value = index;
+    }
+
+    function deleteStudent(index) {
+        let answer = confirm("Are you sure you want to delete this student?");
+        if (!answer) {
+            return;
+        }
+
+        for (let position = index; position < students.length - 1; position++) {
+            students[position] = students[position + 1];
+        }
+        students.length = students.length - 1;
+
+        clearForm();
+        displayStudents();
+        alert("Student deleted successfully.");
+    }
+
+    function searchStudent() {
+        let query = document.getElementById("searchInput").value.toLowerCase();
+        let table = document.getElementById("studentTable");
+        table.innerHTML = "";
+        let matchCount = 0;
+
+        for (let i = 0; i < students.length; i++) {
+            let id = students[i].id.toLowerCase();
+            let name = students[i].name.toLowerCase();
+
+            if (isSubstring(query, id) || isSubstring(query, name)) {
+                table.innerHTML +=
+                    "<tr>" +
+                    "<td>" + (i + 1) + "</td>" +
+                    "<td>" + students[i].id + "</td>" +
+                    "<td>" + students[i].name + "</td>" +
+                    "<td>" + students[i].course + "</td>" +
+                    "<td>" +
+                        "<button onclick='editStudent(" + i + ")'>Edit</button> " +
+                        "<button onclick='deleteStudent(" + i + ")'>Delete</button>" +
+                    "</td>" +
+                    "</tr>";
+                matchCount++;
+            }
+        }
+
+        if (matchCount === 0) {
+            table.innerHTML = "<tr><td colspan='5'>No matching records found.</td></tr>";
+        }
+
+        document.getElementById("totalStudents").innerText = "Total Students: " + students.length + " (Matches: " + matchCount + ")";
+    }
+
+    function isSubstring(searchStr, fullStr) {
+        if (searchStr === "") return true;
+        if (searchStr.length > fullStr.length) return false;
+
+        for (let i = 0; i <= fullStr.length - searchStr.length; i++) {
+            let found = true;
+            for (let j = 0; j < searchStr.length; j++) {
+                if (fullStr[i + j] !== searchStr[j]) {
+                    found = false;
+                    break;
+                }
+            }
+            if (found) return true;
+        }
+        return false;
+    }
+
+    function sortByName() {
+        for (let i = 0; i < students.length - 1; i++) {
+            for (let j = 0; j < students.length - 1 - i; j++) {
+                if (students[j].name.toLowerCase() > students[j + 1].name.toLowerCase()) {
+                    let temp = students[j];
+                    students[j] = students[j + 1];
+                    students[j + 1] = temp;
+                }
+            }
+        }
+        displayStudents();
+    }
+
+    function clearForm() {
+        document.getElementById("studentId").value = "";
+        document.getElementById("studentName").value = "";
+        document.getElementById("studentCourse").value = "";
+        document.getElementById("editIndex").value = "-1";
+    }
+
+    displayStudents();
+</script>
+</body>
+</html>
