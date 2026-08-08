@@ -55,6 +55,11 @@
                 return;
             }
 
+            if (isNaN(id)) {
+                alert("Student ID must contain numbers only.");
+                return;
+            }
+
             for (let i = 0; i < students.length; i++) {
 
                 if (i != editIndex) {
